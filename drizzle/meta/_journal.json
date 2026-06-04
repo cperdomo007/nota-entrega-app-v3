@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1780017190178,
+      "tag": "0000_condemned_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1780019063977,
+      "tag": "0001_daffy_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780178083697,
+      "tag": "0002_slippery_iron_fist",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1780231252548,
+      "tag": "0003_salty_sinister_six",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1780239000000,
+      "tag": "0004_company_logo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1780243457498,
+      "tag": "0005_wide_fixer",
+      "breakpoints": true
+    }
+  ]
+}

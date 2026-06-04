@@ -1,0 +1,11 @@
+.env
+node_modules/
+.manus-logs/
+backups/
+dist/
+build/
+coverage/
+.vite/
+*.log
+.DS_Store
+Thumbs.db
