@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: nota-entrega-app-v3
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_SSL
+        value: "true"
+      - key: DATABASE_URL
+        sync: false

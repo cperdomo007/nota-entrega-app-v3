@@ -1,9 +1,11 @@
 import { eq, desc, like, and, or, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2";
 import { InsertUser, users, products, deliveryNotes, noteLines, serials, companyConfig, clients, budgets, budgetLines, Product, DeliveryNote, NoteLine, Serial, CompanyConfig, Client, Budget, BudgetLine } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: mysql.Pool | null = null;
 
 function getInsertId(result: unknown): number | null {
   const value = result as any;
@@ -78,10 +80,26 @@ function toDateOnly(value: string | Date): Date {
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const databaseUrl = process.env.DATABASE_URL;
+      const useSsl = ["1", "true", "required"].includes((process.env.DATABASE_SSL ?? "").toLowerCase());
+
+      if (useSsl) {
+        _pool = mysql.createPool({
+          uri: databaseUrl,
+          ssl: {
+            rejectUnauthorized: false,
+          },
+          waitForConnections: true,
+          connectionLimit: 10,
+        });
+        _db = drizzle(_pool);
+      } else {
+        _db = drizzle(databaseUrl);
+      }
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
+      _pool = null;
     }
   }
   return _db;
