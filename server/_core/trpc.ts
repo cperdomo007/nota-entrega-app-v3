@@ -24,12 +24,11 @@ const localDevUser: User = {
   lastSignedIn: new Date(),
 };
 
-const canBypassAuthForLocalDev = () =>
-  process.env.NODE_ENV === "development" && !ENV.oAuthServerUrl;
+const canBypassAuthWhenOAuthIsDisabled = () => !ENV.oAuthServerUrl;
 
 const requireUser = t.middleware(async opts => {
   const { ctx, next } = opts;
-  const user = ctx.user ?? (canBypassAuthForLocalDev() ? localDevUser : null);
+  const user = ctx.user ?? (canBypassAuthWhenOAuthIsDisabled() ? localDevUser : null);
 
   if (!user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });

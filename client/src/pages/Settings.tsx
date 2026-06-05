@@ -86,7 +86,8 @@ export default function Settings() {
       await updateConfigMutation.mutateAsync(formData);
       toast.success("Configuración actualizada correctamente");
     } catch (error) {
-      toast.error("Error al actualizar la configuración");
+      const message = error instanceof Error ? error.message : "Error al actualizar la configuración";
+      toast.error(message);
       console.error(error);
     }
   };
@@ -256,7 +257,7 @@ export default function Settings() {
                 Sitio Web
               </label>
               <Input
-                type="url"
+                type="text"
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
