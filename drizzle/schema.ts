@@ -103,6 +103,46 @@ export const deliveryNotes = mysqlTable("delivery_notes", {
 export type DeliveryNote = typeof deliveryNotes.$inferSelect;
 export type InsertDeliveryNote = typeof deliveryNotes.$inferInsert;
 
+// ============ PRESUPUESTOS ============
+export const budgets = mysqlTable("budgets", {
+  id: int("id").autoincrement().primaryKey(),
+  budgetNumber: varchar("budgetNumber", { length: 50 }).notNull().unique(),
+  budgetDate: date("budgetDate").notNull(),
+  clientName: text("clientName").notNull(),
+  clientRif: varchar("clientRif", { length: 50 }),
+  clientAddress: text("clientAddress"),
+  clientPhone: varchar("clientPhone", { length: 20 }),
+  clientContact: varchar("clientContact", { length: 100 }),
+  subtotal: decimal("subtotal", { precision: 12, scale: 2 }).default("0"),
+  applyIVA: boolean("applyIVA").default(true),
+  ivaAmount: decimal("ivaAmount", { precision: 12, scale: 2 }).default("0"),
+  total: decimal("total", { precision: 12, scale: 2 }).default("0"),
+  observations: text("observations"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Budget = typeof budgets.$inferSelect;
+export type InsertBudget = typeof budgets.$inferInsert;
+
+export const budgetLines = mysqlTable("budget_lines", {
+  id: int("id").autoincrement().primaryKey(),
+  budgetId: int("budgetId").notNull(),
+  productId: int("productId"),
+  description: text("description").notNull(),
+  quantity: int("quantity").notNull(),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  lineTotal: decimal("lineTotal", { precision: 12, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  budgetIdIdx: index("budget_lines_budget_id_idx").on(table.budgetId),
+  productIdIdx: index("budget_lines_product_id_idx").on(table.productId),
+}));
+
+export type BudgetLine = typeof budgetLines.$inferSelect;
+export type InsertBudgetLine = typeof budgetLines.$inferInsert;
+
 // ============ LÍNEAS DE NOTA ============
 export const noteLines = mysqlTable("note_lines", {
   id: int("id").autoincrement().primaryKey(),
@@ -138,6 +178,21 @@ export type InsertSerial = typeof serials.$inferInsert;
 // ============ RELACIONES ============
 export const deliveryNotesRelations = relations(deliveryNotes, ({ many }) => ({
   lines: many(noteLines),
+}));
+
+export const budgetsRelations = relations(budgets, ({ many }) => ({
+  lines: many(budgetLines),
+}));
+
+export const budgetLinesRelations = relations(budgetLines, ({ one }) => ({
+  budget: one(budgets, {
+    fields: [budgetLines.budgetId],
+    references: [budgets.id],
+  }),
+  product: one(products, {
+    fields: [budgetLines.productId],
+    references: [products.id],
+  }),
 }));
 
 export const noteLinesRelations = relations(noteLines, ({ one, many }) => ({

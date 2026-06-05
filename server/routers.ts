@@ -35,6 +35,13 @@ import {
   updateClient,
   deleteClient,
   deleteDeliveryNote,
+  getBudgets,
+  searchBudgets,
+  getBudgetById,
+  getBudgetLines,
+  getNextBudgetNumber,
+  createCompleteBudget,
+  deleteBudget,
 } from "./db";
 
 export const appRouter = router({
@@ -491,6 +498,78 @@ export const appRouter = router({
 
     delete: protectedProcedure.input(z.number()).mutation(async ({ input }) => {
       return deleteClient(input);
+    }),
+  }),
+
+  budgets: router({
+    list: publicProcedure
+      .input(
+        z.object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        })
+      )
+      .query(async ({ input }) => {
+        return getBudgets(input.limit, input.offset);
+      }),
+
+    search: publicProcedure.input(z.string()).query(async ({ input }) => {
+      if (!input.trim()) return [];
+      return searchBudgets(input);
+    }),
+
+    getById: publicProcedure.input(z.number()).query(async ({ input }) => {
+      const budget = await getBudgetById(input);
+      if (!budget) return null;
+      const lines = await getBudgetLines(input);
+      return { ...budget, lines };
+    }),
+
+    getNextNumber: publicProcedure.query(async () => {
+      return getNextBudgetNumber();
+    }),
+
+    createComplete: protectedProcedure
+      .input(
+        z.object({
+          budgetNumber: z.string().trim().min(1, "El numero de presupuesto es obligatorio"),
+          budgetDate: z.string().min(1, "La fecha es obligatoria"),
+          clientName: z.string().trim().min(1, "El cliente es obligatorio"),
+          clientRif: z.string().optional(),
+          clientAddress: z.string().optional(),
+          clientPhone: z.string().optional(),
+          clientContact: z.string().optional(),
+          applyIVA: z.boolean().default(true),
+          ivaRate: z.string().or(z.number()).optional(),
+          observations: z.string().optional(),
+          lines: z.array(
+            z.object({
+              productId: z.number().int().positive().optional(),
+              description: z.string().trim().min(1, "La descripcion es obligatoria"),
+              quantity: z.number().int().positive(),
+              unitPrice: z.coerce.number().nonnegative(),
+            })
+          ).min(1, "El presupuesto debe tener al menos un item"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        return createCompleteBudget({
+          budgetNumber: input.budgetNumber,
+          budgetDate: input.budgetDate,
+          clientName: input.clientName,
+          clientRif: input.clientRif || null,
+          clientAddress: input.clientAddress || null,
+          clientPhone: input.clientPhone || null,
+          clientContact: input.clientContact || null,
+          applyIVA: input.applyIVA,
+          ivaRate: input.ivaRate,
+          observations: input.observations || null,
+          lines: input.lines,
+        });
+      }),
+
+    delete: protectedProcedure.input(z.number()).mutation(async ({ input }) => {
+      return deleteBudget(input);
     }),
   }),
 });

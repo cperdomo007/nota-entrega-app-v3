@@ -1,6 +1,6 @@
 import { eq, desc, like, and, or, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, deliveryNotes, noteLines, serials, companyConfig, clients, Product, DeliveryNote, NoteLine, Serial, CompanyConfig, Client } from "../drizzle/schema";
+import { InsertUser, users, products, deliveryNotes, noteLines, serials, companyConfig, clients, budgets, budgetLines, Product, DeliveryNote, NoteLine, Serial, CompanyConfig, Client, Budget, BudgetLine } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -37,6 +37,27 @@ export type CompleteDeliveryNoteInput = {
 
 export type UpdateCompleteDeliveryNoteInput = CompleteDeliveryNoteInput & {
   id: number;
+};
+
+export type CompleteBudgetLineInput = {
+  productId?: number | null;
+  description: string;
+  quantity: number;
+  unitPrice: string | number;
+};
+
+export type CompleteBudgetInput = {
+  budgetNumber: string;
+  budgetDate: string | Date;
+  clientName: string;
+  clientRif?: string | null;
+  clientAddress?: string | null;
+  clientPhone?: string | null;
+  clientContact?: string | null;
+  applyIVA: boolean;
+  ivaRate?: string | number | null;
+  observations?: string | null;
+  lines: CompleteBudgetLineInput[];
 };
 
 function toMoney(value: number): string {
@@ -572,6 +593,168 @@ export async function updateCompleteDeliveryNote(data: UpdateCompleteDeliveryNot
       ivaAmount: toMoney(ivaAmount),
       total: toMoney(total),
     };
+  });
+}
+
+// ============ PRESUPUESTOS ============
+export async function getBudgets(limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(budgets).orderBy(desc(budgets.createdAt)).limit(limit).offset(offset);
+}
+
+export async function searchBudgets(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(budgets).where(
+    or(
+      like(budgets.budgetNumber, `%${query}%`),
+      like(budgets.clientName, `%${query}%`)
+    )
+  ).orderBy(desc(budgets.createdAt)).limit(50);
+}
+
+export async function getBudgetById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(budgets).where(eq(budgets.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function getBudgetLines(budgetId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      line: budgetLines,
+      product: products,
+    })
+    .from(budgetLines)
+    .leftJoin(products, eq(budgetLines.productId, products.id))
+    .where(eq(budgetLines.budgetId, budgetId));
+
+  return rows.map((row) => ({
+    ...row.line,
+    product: row.product,
+  }));
+}
+
+export async function getNextBudgetNumber() {
+  return getNextNoteNumber();
+}
+
+export async function createCompleteBudget(data: CompleteBudgetInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const budgetNumber = data.budgetNumber.trim();
+  const clientName = data.clientName.trim();
+
+  if (!budgetNumber) throw new Error("El numero de presupuesto es obligatorio");
+  if (!clientName) throw new Error("El cliente es obligatorio");
+  if (!data.lines.length) throw new Error("El presupuesto debe tener al menos un item");
+
+  const existingBudget = await db
+    .select({ id: budgets.id })
+    .from(budgets)
+    .where(eq(budgets.budgetNumber, budgetNumber))
+    .limit(1);
+
+  if (existingBudget.length > 0) {
+    throw new Error(`Ya existe un presupuesto con el numero ${budgetNumber}`);
+  }
+
+  const normalizedLines = data.lines.map((line, index) => {
+    const quantity = Number(line.quantity);
+    const unitPrice = Number(line.unitPrice);
+    const description = line.description.trim();
+
+    if (!description) {
+      throw new Error(`La descripcion de la linea ${index + 1} es obligatoria`);
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw new Error(`La cantidad de la linea ${index + 1} debe ser mayor que cero`);
+    }
+
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      throw new Error(`El precio de la linea ${index + 1} no es valido`);
+    }
+
+    return {
+      productId: line.productId ?? null,
+      description,
+      quantity,
+      unitPrice,
+      lineTotal: quantity * unitPrice,
+    };
+  });
+
+  const subtotal = normalizedLines.reduce((sum, line) => sum + line.lineTotal, 0);
+  const ivaRate = Number(data.ivaRate ?? 16);
+  const ivaAmount = data.applyIVA ? subtotal * (ivaRate / 100) : 0;
+  const total = subtotal + ivaAmount;
+
+  return db.transaction(async (tx) => {
+    const budgetInsertResult = await tx.insert(budgets).values({
+      budgetNumber,
+      budgetDate: toDateOnly(data.budgetDate),
+      clientName,
+      clientRif: data.clientRif || null,
+      clientAddress: data.clientAddress || null,
+      clientPhone: data.clientPhone || null,
+      clientContact: data.clientContact || null,
+      applyIVA: data.applyIVA,
+      subtotal: toMoney(subtotal),
+      ivaAmount: toMoney(ivaAmount),
+      total: toMoney(total),
+      observations: data.observations || null,
+    });
+
+    let budgetId = getInsertId(budgetInsertResult);
+
+    if (!budgetId) {
+      const createdBudget = await tx
+        .select({ id: budgets.id })
+        .from(budgets)
+        .where(eq(budgets.budgetNumber, budgetNumber))
+        .limit(1);
+      budgetId = createdBudget[0]?.id ?? null;
+    }
+
+    if (!budgetId) {
+      throw new Error("No se pudo obtener el ID del presupuesto creado");
+    }
+
+    await tx.insert(budgetLines).values(
+      normalizedLines.map((line) => ({
+        budgetId,
+        productId: line.productId,
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: toMoney(line.unitPrice),
+        lineTotal: toMoney(line.lineTotal),
+      }))
+    );
+
+    return {
+      id: budgetId,
+      budgetNumber,
+      subtotal: toMoney(subtotal),
+      ivaAmount: toMoney(ivaAmount),
+      total: toMoney(total),
+    };
+  });
+}
+
+export async function deleteBudget(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.transaction(async (tx) => {
+    await tx.delete(budgetLines).where(eq(budgetLines.budgetId, id));
+    await tx.delete(budgets).where(eq(budgets.id, id));
+    return { success: true };
   });
 }
 

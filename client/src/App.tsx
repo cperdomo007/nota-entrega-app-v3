@@ -11,6 +11,9 @@ import NotesList from "./pages/NotesList";
 import Settings from "./pages/Settings";
 import Products from "./pages/Products";
 import Clients from "./pages/Clients";
+import BudgetsList from "./pages/BudgetsList";
+import CreateBudget from "./pages/CreateBudget";
+import BudgetDetail from "./pages/BudgetDetail";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +24,9 @@ function Router() {
       <Route path={"/notes/:id/edit"} component={CreateNote} />
       <Route path={"/notes"} component={NotesList} />
       <Route path={"/notes/:id"} component={NoteDetail} />
+      <Route path={"/budgets/new"} component={CreateBudget} />
+      <Route path={"/budgets/:id"} component={BudgetDetail} />
+      <Route path={"/budgets"} component={BudgetsList} />
       <Route path={"/products"} component={Products} />
       <Route path={"/clients"} component={Clients} />
       <Route path={"/settings"} component={Settings} />
