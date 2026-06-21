@@ -294,6 +294,9 @@ export default function NoteDetail() {
       {/* Print Styles */}
       <style>{`
         @media print {
+          @page {
+            margin: 0.35in 0.35in 0.5cm 0.35in;
+          }
           body {
             margin: 0;
             padding: 0;
@@ -312,7 +315,7 @@ export default function NoteDetail() {
             display: none !important;
           }
           .note-print-content {
-            padding: 0.35in !important;
+            padding: 0 !important;
             box-shadow: none !important;
           }
         }
