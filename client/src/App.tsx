@@ -25,6 +25,7 @@ function Router() {
       <Route path={"/notes"} component={NotesList} />
       <Route path={"/notes/:id"} component={NoteDetail} />
       <Route path={"/budgets/new"} component={CreateBudget} />
+      <Route path={"/budgets/:id/edit"} component={CreateBudget} />
       <Route path={"/budgets/:id"} component={BudgetDetail} />
       <Route path={"/budgets"} component={BudgetsList} />
       <Route path={"/products"} component={Products} />

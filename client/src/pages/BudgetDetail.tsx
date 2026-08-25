@@ -1,7 +1,7 @@
 import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Download, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Edit, Printer, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function BudgetDetail() {
@@ -52,6 +52,10 @@ export default function BudgetDetail() {
             <Button onClick={() => window.print()} style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "white", color: "#334155", border: "1px solid #cbd5e1", padding: "0.75rem 1.5rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
               <Download style={{ width: "1rem", height: "1rem" }} />
               Guardar PDF
+            </Button>
+            <Button onClick={() => setLocation(`/budgets/${budgetId}/edit`)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "white", color: "#334155", border: "1px solid #cbd5e1", padding: "0.75rem 1.5rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
+              <Edit style={{ width: "1rem", height: "1rem" }} />
+              Editar
             </Button>
             <Button
               onClick={() => {

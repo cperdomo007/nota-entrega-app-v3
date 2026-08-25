@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { format } from "date-fns";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,11 @@ interface BudgetLineItem {
 }
 
 export default function CreateBudget() {
+  const [editMatch, editParams] = useRoute("/budgets/:id/edit");
   const [, setLocation] = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const budgetId = Number(editParams?.id);
+  const isEditing = Boolean(editMatch && budgetId);
 
   const [budgetNumber, setBudgetNumber] = useState("");
   const [budgetDate, setBudgetDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -35,18 +38,45 @@ export default function CreateBudget() {
   const [showClientSearch, setShowClientSearch] = useState(false);
 
   const { data: nextNumber } = trpc.budgets.getNextNumber.useQuery();
+  const { data: budgetToEdit, isLoading: isLoadingBudgetToEdit } = trpc.budgets.getById.useQuery(budgetId, {
+    enabled: isEditing,
+  });
   const { data: config } = trpc.config.get.useQuery();
   const { data: products = [] } = trpc.products.list.useQuery();
   const { data: searchClientResults = [] } = trpc.clients.search.useQuery(clientSearchQuery, {
     enabled: clientSearchQuery.trim().length > 0,
   });
   const createBudgetMutation = trpc.budgets.createComplete.useMutation();
+  const updateBudgetMutation = trpc.budgets.updateComplete.useMutation();
 
   useEffect(() => {
-    if (nextNumber && !budgetNumber) {
+    if (!isEditing && nextNumber && !budgetNumber) {
       setBudgetNumber(nextNumber);
     }
-  }, [budgetNumber, nextNumber]);
+  }, [budgetNumber, isEditing, nextNumber]);
+
+  useEffect(() => {
+    if (!budgetToEdit) return;
+
+    setBudgetNumber(String(budgetToEdit.budgetNumber ?? ""));
+    setBudgetDate(format(new Date(budgetToEdit.budgetDate as any), "yyyy-MM-dd"));
+    setClientName(String(budgetToEdit.clientName ?? ""));
+    setClientRif(String(budgetToEdit.clientRif ?? ""));
+    setClientAddress(String(budgetToEdit.clientAddress ?? ""));
+    setClientPhone(String(budgetToEdit.clientPhone ?? ""));
+    setClientContact(String(budgetToEdit.clientContact ?? ""));
+    setObservations(String(budgetToEdit.observations ?? ""));
+    setApplyIVA(Boolean(budgetToEdit.applyIVA));
+    setLines(
+      (budgetToEdit.lines ?? []).map((line: any) => ({
+        productId: line.productId ?? undefined,
+        description: String(line.description ?? ""),
+        quantity: Number(line.quantity) || 1,
+        unitPrice: Number(line.unitPrice) || 0,
+        lineTotal: Number(line.lineTotal) || 0,
+      }))
+    );
+  }, [budgetToEdit]);
 
   const productSearchResults = useMemo(() => {
     const query = productSearchQuery.trim().toLowerCase();
@@ -122,7 +152,7 @@ export default function CreateBudget() {
     if (lines.length === 0) return alert("Agrega al menos un item");
 
     try {
-      const result = await createBudgetMutation.mutateAsync({
+      const payload = {
         budgetNumber: budgetNumber.trim(),
         budgetDate,
         clientName: clientName.trim(),
@@ -139,20 +169,42 @@ export default function CreateBudget() {
           quantity: line.quantity,
           unitPrice: line.unitPrice,
         })),
-      });
+      };
+
+      const result = isEditing
+        ? await updateBudgetMutation.mutateAsync({
+            id: budgetId,
+            ...payload,
+          })
+        : await createBudgetMutation.mutateAsync(payload);
 
       setLocation(`/budgets/${result.id}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al crear el presupuesto";
+      const message = error instanceof Error ? error.message : "Error al guardar el presupuesto";
       alert(message);
     }
   };
+
+  if (isEditing && isLoadingBudgetToEdit) {
+    return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>Cargando presupuesto...</div>;
+  }
+
+  if (isEditing && !budgetToEdit) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", marginBottom: "1rem" }}>Presupuesto no encontrado</div>
+          <Button onClick={() => setLocation("/budgets")}>Volver</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
         <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-          <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>Nuevo Presupuesto</h1>
+          <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>{isEditing ? `Editar Presupuesto #${budgetNumber}` : "Nuevo Presupuesto"}</h1>
           <Button onClick={() => setLocation("/budgets")} style={{ background: "white", color: "#334155", border: "1px solid #cbd5e1", padding: "0.75rem 1.5rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
             Volver
           </Button>
@@ -216,8 +268,8 @@ export default function CreateBudget() {
               <span style={{ fontSize: "1.125rem", fontWeight: "600" }}>TOTAL NETO</span>
               <span style={{ fontSize: "1.5rem", fontWeight: "bold", color: "rgb(59, 130, 246)" }}>${totals.total.toFixed(2)}</span>
             </div>
-            <Button onClick={handleSave} disabled={createBudgetMutation.isPending} style={{ width: "100%", background: "rgb(59, 130, 246)", color: "white", border: "none", padding: "0.75rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
-              {createBudgetMutation.isPending ? "Guardando..." : "Guardar Presupuesto"}
+            <Button onClick={handleSave} disabled={createBudgetMutation.isPending || updateBudgetMutation.isPending} style={{ width: "100%", background: "rgb(59, 130, 246)", color: "white", border: "none", padding: "0.75rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
+              {createBudgetMutation.isPending || updateBudgetMutation.isPending ? "Guardando..." : "Guardar Presupuesto"}
             </Button>
           </Card>
         </div>

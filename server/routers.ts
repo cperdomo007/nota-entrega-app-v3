@@ -41,6 +41,7 @@ import {
   getBudgetLines,
   getNextBudgetNumber,
   createCompleteBudget,
+  updateCompleteBudget,
   deleteBudget,
 } from "./db";
 
@@ -554,6 +555,47 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         return createCompleteBudget({
+          budgetNumber: input.budgetNumber,
+          budgetDate: input.budgetDate,
+          clientName: input.clientName,
+          clientRif: input.clientRif || null,
+          clientAddress: input.clientAddress || null,
+          clientPhone: input.clientPhone || null,
+          clientContact: input.clientContact || null,
+          applyIVA: input.applyIVA,
+          ivaRate: input.ivaRate,
+          observations: input.observations || null,
+          lines: input.lines,
+        });
+      }),
+
+    updateComplete: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          budgetNumber: z.string().trim().min(1, "El numero de presupuesto es obligatorio"),
+          budgetDate: z.string().min(1, "La fecha es obligatoria"),
+          clientName: z.string().trim().min(1, "El cliente es obligatorio"),
+          clientRif: z.string().optional(),
+          clientAddress: z.string().optional(),
+          clientPhone: z.string().optional(),
+          clientContact: z.string().optional(),
+          applyIVA: z.boolean().default(true),
+          ivaRate: z.string().or(z.number()).optional(),
+          observations: z.string().optional(),
+          lines: z.array(
+            z.object({
+              productId: z.number().int().positive().optional(),
+              description: z.string().trim().min(1, "La descripcion es obligatoria"),
+              quantity: z.number().int().positive(),
+              unitPrice: z.coerce.number().nonnegative(),
+            })
+          ).min(1, "El presupuesto debe tener al menos un item"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        return updateCompleteBudget({
+          id: input.id,
           budgetNumber: input.budgetNumber,
           budgetDate: input.budgetDate,
           clientName: input.clientName,

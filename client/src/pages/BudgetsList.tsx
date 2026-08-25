@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { Eye, FileText, Home, Plus, Search } from "lucide-react";
+import { Edit, Eye, FileText, Home, Plus, Search } from "lucide-react";
 import { format } from "date-fns";
 
 export default function BudgetsList() {
@@ -85,6 +85,9 @@ export default function BudgetsList() {
                     <td style={{ padding: "1rem", textAlign: "center" }}>
                       <button onClick={() => setLocation(`/budgets/${budget.id}`)} title="Ver detalle" style={{ padding: "0.5rem", background: "transparent", border: "1px solid #e2e8f0", borderRadius: "0.375rem", cursor: "pointer", color: "#64748b" }}>
                         <Eye style={{ width: "1rem", height: "1rem" }} />
+                      </button>
+                      <button onClick={() => setLocation(`/budgets/${budget.id}/edit`)} title="Editar presupuesto" style={{ padding: "0.5rem", marginLeft: "0.5rem", background: "transparent", border: "1px solid #e2e8f0", borderRadius: "0.375rem", cursor: "pointer", color: "#64748b" }}>
+                        <Edit style={{ width: "1rem", height: "1rem" }} />
                       </button>
                     </td>
                   </tr>

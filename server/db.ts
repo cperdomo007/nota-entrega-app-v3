@@ -62,6 +62,10 @@ export type CompleteBudgetInput = {
   lines: CompleteBudgetLineInput[];
 };
 
+export type UpdateCompleteBudgetInput = CompleteBudgetInput & {
+  id: number;
+};
+
 function toMoney(value: number): string {
   return value.toFixed(2);
 }
@@ -757,6 +761,107 @@ export async function createCompleteBudget(data: CompleteBudgetInput) {
 
     return {
       id: budgetId,
+      budgetNumber,
+      subtotal: toMoney(subtotal),
+      ivaAmount: toMoney(ivaAmount),
+      total: toMoney(total),
+    };
+  });
+}
+
+export async function updateCompleteBudget(data: UpdateCompleteBudgetInput) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const budgetNumber = data.budgetNumber.trim();
+  const clientName = data.clientName.trim();
+
+  if (!budgetNumber) throw new Error("El numero de presupuesto es obligatorio");
+  if (!clientName) throw new Error("El cliente es obligatorio");
+  if (!data.lines.length) throw new Error("El presupuesto debe tener al menos un item");
+
+  const currentBudget = await db
+    .select({ id: budgets.id })
+    .from(budgets)
+    .where(eq(budgets.id, data.id))
+    .limit(1);
+
+  if (currentBudget.length === 0) {
+    throw new Error("El presupuesto no existe");
+  }
+
+  const existingBudget = await db
+    .select({ id: budgets.id })
+    .from(budgets)
+    .where(eq(budgets.budgetNumber, budgetNumber))
+    .limit(1);
+
+  if (existingBudget.length > 0 && existingBudget[0].id !== data.id) {
+    throw new Error(`Ya existe un presupuesto con el numero ${budgetNumber}`);
+  }
+
+  const normalizedLines = data.lines.map((line, index) => {
+    const quantity = Number(line.quantity);
+    const unitPrice = Number(line.unitPrice);
+    const description = line.description.trim();
+
+    if (!description) {
+      throw new Error(`La descripcion de la linea ${index + 1} es obligatoria`);
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw new Error(`La cantidad de la linea ${index + 1} debe ser mayor que cero`);
+    }
+
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      throw new Error(`El precio de la linea ${index + 1} no es valido`);
+    }
+
+    return {
+      productId: line.productId ?? null,
+      description,
+      quantity,
+      unitPrice,
+      lineTotal: quantity * unitPrice,
+    };
+  });
+
+  const subtotal = normalizedLines.reduce((sum, line) => sum + line.lineTotal, 0);
+  const ivaRate = Number(data.ivaRate ?? 16);
+  const ivaAmount = data.applyIVA ? subtotal * (ivaRate / 100) : 0;
+  const total = subtotal + ivaAmount;
+
+  return db.transaction(async (tx) => {
+    await tx.update(budgets).set({
+      budgetNumber,
+      budgetDate: toDateOnly(data.budgetDate),
+      clientName,
+      clientRif: data.clientRif || null,
+      clientAddress: data.clientAddress || null,
+      clientPhone: data.clientPhone || null,
+      clientContact: data.clientContact || null,
+      applyIVA: data.applyIVA,
+      subtotal: toMoney(subtotal),
+      ivaAmount: toMoney(ivaAmount),
+      total: toMoney(total),
+      observations: data.observations || null,
+    }).where(eq(budgets.id, data.id));
+
+    await tx.delete(budgetLines).where(eq(budgetLines.budgetId, data.id));
+
+    await tx.insert(budgetLines).values(
+      normalizedLines.map((line) => ({
+        budgetId: data.id,
+        productId: line.productId,
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: toMoney(line.unitPrice),
+        lineTotal: toMoney(line.lineTotal),
+      }))
+    );
+
+    return {
+      id: data.id,
       budgetNumber,
       subtotal: toMoney(subtotal),
       ivaAmount: toMoney(ivaAmount),
