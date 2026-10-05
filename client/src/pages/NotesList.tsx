@@ -52,10 +52,10 @@ export default function NotesList() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
         {/* Header */}
-        <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="responsive-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>
               Notas de Entrega
@@ -96,7 +96,7 @@ export default function NotesList() {
         </Card>
 
         {/* Notes Table */}
-        <Card style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
+        <Card className="responsive-table" style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
           {isLoading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>
               Cargando notas...
@@ -162,7 +162,7 @@ export default function NotesList() {
               </table>
 
               {/* Pagination */}
-              <div style={{ padding: "1rem", background: "#f8fafc", borderTop: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div className="notes-pagination" style={{ padding: "1rem", background: "#f8fafc", borderTop: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ color: "#64748b", fontSize: "0.875rem" }}>
                   Mostrando {visibleNotes.length} de {notes?.length || 0} notas
                 </div>

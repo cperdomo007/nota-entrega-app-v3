@@ -14,6 +14,7 @@ import Clients from "./pages/Clients";
 import BudgetsList from "./pages/BudgetsList";
 import CreateBudget from "./pages/CreateBudget";
 import BudgetDetail from "./pages/BudgetDetail";
+import PriceList from "./pages/PriceList";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +30,7 @@ function Router() {
       <Route path={"/budgets/:id"} component={BudgetDetail} />
       <Route path={"/budgets"} component={BudgetsList} />
       <Route path={"/products"} component={Products} />
+      <Route path={"/price-list"} component={PriceList} />
       <Route path={"/clients"} component={Clients} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />

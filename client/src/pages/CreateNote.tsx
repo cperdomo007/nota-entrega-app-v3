@@ -354,16 +354,16 @@ export default function CreateNote() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
-        <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="responsive-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>{isEditing ? `Editar Nota #${noteNumber}` : "Nueva Nota de Entrega"}</h1>
           <Button onClick={() => setLocation("/")} style={{ background: "transparent", color: "#64748b", border: "1px solid #e2e8f0", padding: "0.5rem 1rem", borderRadius: "0.375rem", cursor: "pointer" }}>
             ← Volver
           </Button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" }}>
+        <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" }}>
           <div>
             <Card style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
               <h2 style={{ fontSize: "1.125rem", fontWeight: "600", color: "#1e293b", marginBottom: "1rem" }}>Datos de la Nota</h2>

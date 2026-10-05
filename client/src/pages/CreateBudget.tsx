@@ -201,16 +201,16 @@ export default function CreateBudget() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
-        <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+        <div className="responsive-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>{isEditing ? `Editar Presupuesto #${budgetNumber}` : "Nuevo Presupuesto"}</h1>
           <Button onClick={() => setLocation("/budgets")} style={{ background: "white", color: "#334155", border: "1px solid #cbd5e1", padding: "0.75rem 1.5rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
             Volver
           </Button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" }}>
+        <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "2rem" }}>
           <div>
             <Card style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
               <h2 style={{ fontSize: "1.125rem", fontWeight: "600", color: "#1e293b", marginBottom: "1rem" }}>Datos del Presupuesto</h2>

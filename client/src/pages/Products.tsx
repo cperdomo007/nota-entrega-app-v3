@@ -218,10 +218,10 @@ export default function Products() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
         {/* Header */}
-        <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="responsive-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <button
               onClick={() => setLocation("/")}
@@ -281,7 +281,7 @@ export default function Products() {
               {editingId ? "Editar Producto" : "Nuevo Producto"}
             </h2>
             <form onSubmit={handleSubmit}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+              <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", color: "#475569", marginBottom: "0.5rem" }}>
                     Código de Barras
@@ -325,7 +325,7 @@ export default function Products() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+              <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", color: "#475569", marginBottom: "0.5rem" }}>
                     Precio *
@@ -397,7 +397,7 @@ export default function Products() {
         )}
 
         {/* Products Table */}
-        <Card style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
+        <Card className="responsive-table" style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
           {isLoading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>
               Cargando productos...

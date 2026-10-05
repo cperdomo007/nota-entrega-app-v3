@@ -37,9 +37,9 @@ export default function BudgetDetail() {
   const lines = budget.lines ?? [];
 
   return (
-    <div className="budget-detail-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page budget-detail-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div className="budget-detail-shell" style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <div className="budget-detail-screen-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+        <div className="responsive-header budget-detail-screen-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>Presupuesto #{budget.budgetNumber}</h1>
             <p style={{ color: "#64748b", marginTop: "0.5rem" }}>{format(new Date(budget.budgetDate as any), "dd/MM/yyyy")}</p>
@@ -73,6 +73,7 @@ export default function BudgetDetail() {
           </div>
         </div>
 
+        <div className="document-scroll">
         <div className="budget-print-content" style={{ background: "white", padding: "2.5rem", fontFamily: "Arial, sans-serif", fontSize: "11px", lineHeight: 1.4 }}>
           {config && (
             <div style={{ marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid #333" }}>
@@ -177,6 +178,7 @@ export default function BudgetDetail() {
             </div>
           </div>
         </div>
+      </div>
       </div>
       <style>{`
         @media print {

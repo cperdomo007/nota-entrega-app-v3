@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Plus, FileText, Settings, Package, Users, Calculator } from "lucide-react";
+import { Plus, FileText, Settings, Package, Users, Calculator, ListOrdered } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -14,7 +14,7 @@ export default function Home() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page home-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
         {/* Header */}
         <div style={{ marginBottom: "3rem" }}>
@@ -27,7 +27,7 @@ export default function Home() {
         </div>
 
         {/* Quick Actions */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem", marginBottom: "3rem" }}>
+        <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem", marginBottom: "3rem" }}>
           <Card style={{ padding: "1.5rem", cursor: "pointer", transition: "all 200ms" }}
             onClick={() => setLocation("/notes/new")}
             onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1)"}
@@ -79,6 +79,28 @@ export default function Home() {
                 </p>
               </div>
               <Package style={{ width: "1.25rem", height: "1.25rem", color: "rgb(59, 130, 246)" }} />
+            </div>
+          </Card>
+
+          <Card style={{ padding: "1.5rem", cursor: "pointer", transition: "all 200ms" }}
+            role="link"
+            tabIndex={0}
+            aria-label="Lista de Precios"
+            onClick={() => setLocation("/price-list")}
+            onKeyDown={(e) => { if (e.key === "Enter") setLocation("/price-list"); }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1)"}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)"}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+              <div>
+                <h3 style={{ fontWeight: "600", color: "#1e293b", marginBottom: "0.25rem" }}>
+                  Lista de Precios
+                </h3>
+                <p style={{ fontSize: "0.875rem", color: "#64748b" }}>
+                  USD, Mercado Libre y CASHEA
+                </p>
+              </div>
+              <ListOrdered style={{ width: "1.25rem", height: "1.25rem", flexShrink: 0, color: "rgb(59, 130, 246)" }} />
             </div>
           </Card>
 
@@ -156,6 +178,7 @@ export default function Home() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {notes?.map((note) => (
                 <Card
+                  className="recent-note"
                   key={note.id}
                   style={{ padding: "1rem", cursor: "pointer", transition: "all 200ms" }}
                   onClick={() => setLocation(`/notes/${note.id}`)}

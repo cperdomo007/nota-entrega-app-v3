@@ -25,9 +25,9 @@ export default function BudgetsList() {
   const isLoading = hasSearch ? isSearchLoading : isPagedLoading;
 
   return (
-    <div style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div style={{ maxWidth: "80rem", marginLeft: "auto", marginRight: "auto" }}>
-        <div style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+        <div className="responsive-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>Presupuestos</h1>
             <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Crea y consulta presupuestos para tus clientes</p>
@@ -56,7 +56,7 @@ export default function BudgetsList() {
           </div>
         </Card>
 
-        <Card style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
+        <Card className="responsive-table" style={{ border: "1px solid #e2e8f0", overflow: "hidden" }}>
           {isLoading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Cargando presupuestos...</div>
           ) : budgets.length === 0 ? (

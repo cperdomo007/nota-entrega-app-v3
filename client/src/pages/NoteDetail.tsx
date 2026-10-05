@@ -70,10 +70,10 @@ export default function NoteDetail() {
   const total = parseFloat(note.total as any || "0");
 
   return (
-    <div className="note-detail-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
+    <div className="app-page note-detail-page" style={{ minHeight: "100vh", padding: "2rem", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
       <div className="note-detail-shell" style={{ maxWidth: "900px", marginLeft: "auto", marginRight: "auto" }}>
         {/* Header */}
-        <div className="note-detail-screen-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="responsive-header note-detail-screen-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>
               Nota de Entrega #{note.noteNumber}
@@ -125,6 +125,7 @@ export default function NoteDetail() {
         </div>
 
         {/* Print Content */}
+        <div className="document-scroll">
         <div className="note-print-content" ref={printRef} style={{ background: "white", padding: "2.5rem", fontFamily: "Arial, sans-serif", fontSize: "11px", lineHeight: "1.4" }}>
           {/* Company Header */}
           {config && (
@@ -291,6 +292,7 @@ export default function NoteDetail() {
         </div>
       </div>
 
+      </div>
       {/* Print Styles */}
       <style>{`
         @media print {

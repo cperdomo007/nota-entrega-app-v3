@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
+import { priceListRouter } from "./priceList";
 import {
   getProducts,
   getProductById,
@@ -46,6 +47,7 @@ import {
 } from "./db";
 
 export const appRouter = router({
+  priceList: priceListRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

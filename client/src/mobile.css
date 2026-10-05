@@ -1,0 +1,50 @@
+@media screen and (max-width: 767px) {
+  .app-page, .price-list { padding: 16px !important; box-sizing: border-box; }
+  .app-page > div, .price-list > div { min-width: 0; width: 100%; }
+  .app-page h1, .price-list h1 { font-size: 24px !important; line-height: 1.25; overflow-wrap: anywhere; }
+  .app-page h2 { font-size: 20px !important; }
+  .app-page p, .app-page label { overflow-wrap: anywhere; }
+  .app-page .responsive-header { flex-wrap: wrap; align-items: flex-start !important; gap: 16px; margin-bottom: 24px !important; }
+  .app-page .responsive-header > div { min-width: 0; max-width: 100%; }
+  .app-page .responsive-header > div:first-child { flex: 1 1 100%; }
+  .app-page .responsive-header > div:last-child { flex-wrap: wrap; justify-content: flex-start !important; }
+  .app-page .responsive-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
+  .app-page .responsive-grid > div { min-width: 0; }
+  .app-page .responsive-grid [data-slot="card"][style*="sticky"] { position: static !important; }
+  .app-page [data-slot="card"]:not(.responsive-table) { padding: 16px !important; box-sizing: border-box; }
+  .app-page input:not([type="checkbox"]):not([type="file"]),
+  .app-page select, .app-page textarea {
+    box-sizing: border-box; min-width: 0; max-width: 100%; min-height: 44px;
+    font-size: 16px !important; padding: 10px 12px !important;
+    border: 1px solid #cbd5e1; border-radius: 6px; background: white;
+  }
+  .app-page input:not([type="checkbox"]):not([type="file"]):not(table input),
+  .app-page select, .app-page textarea { width: 100%; }
+  .app-page input[type="checkbox"] { width: 20px !important; height: 20px !important; flex-shrink: 0; }
+  .app-page button, .price-list button {
+    min-height: 44px !important; min-width: 44px; box-sizing: border-box;
+    white-space: normal; flex-shrink: 0; touch-action: manipulation;
+  }
+  .app-page button svg { flex-shrink: 0; }
+  .app-page form button { overflow-wrap: anywhere; }
+  .app-page .responsive-table { overflow-x: auto !important; overscroll-behavior-x: contain; max-width: 100%; }
+  .app-page table { min-width: 680px; }
+  .app-page table th, .app-page table td { padding: 12px !important; }
+  .app-page table td:first-child { overflow-wrap: anywhere; }
+  .app-page .notes-pagination { flex-direction: column; align-items: stretch !important; gap: 12px; }
+  .app-page .notes-pagination > div:last-child { flex-wrap: wrap; }
+  .app-page .document-scroll { overflow-x: auto; max-width: 100%; overscroll-behavior-x: contain; }
+  .app-page .document-scroll > div { min-width: 760px; box-sizing: border-box; }
+  .home-page > div > div:first-child { margin-bottom: 24px !important; }
+  .home-page [data-slot="card"] { overflow-wrap: anywhere; border-radius: 6px; }
+  .home-page [data-slot="card"] > div { gap: 12px; }
+  .home-page [data-slot="card"] > div > div { min-width: 0; }
+  .home-page [data-slot="card"] > div > div:last-child { flex-shrink: 0; }
+  .home-page .recent-note > div { flex-direction: column; align-items: stretch !important; }
+  .home-page .recent-note > div > div:last-child { text-align: left !important; }
+  .price-list input:not([type="file"]) { min-height: 44px; font-size: 16px; }
+  .price-list .price-list-header-actions { flex-wrap: nowrap; gap: 8px; }
+  .price-list .price-list-header-actions button { padding: 8px 10px; }
+  .price-list .price-list-header-actions button.price-list-home { min-width: 96px; }
+  .price-list header { row-gap: 16px; }
+}
