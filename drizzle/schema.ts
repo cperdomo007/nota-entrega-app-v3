@@ -47,6 +47,7 @@ export type InsertProduct = typeof products.$inferInsert;
 export const priceList = mysqlTable("price_list", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique(),
+  availability: int("availability"),
   priceUSD: decimal("priceUSD", { precision: 10, scale: 2 }).notNull(),
   priceMercadoLibre: decimal("priceMercadoLibre", { precision: 10, scale: 2 }),
   priceCashea: decimal("priceCashea", { precision: 10, scale: 2 }),

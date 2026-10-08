@@ -14,10 +14,22 @@ async function database() {
   initialization ??= db.execute(sql`CREATE TABLE IF NOT EXISTS price_list (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
+    availability INT NULL,
     priceUSD DECIMAL(10,2) NOT NULL,
     priceMercadoLibre DECIMAL(10,2) NULL,
     priceCashea DECIMAL(10,2) NULL
-  )`).then(() => undefined).catch(error => { initialization = undefined; throw error; });
+  )`).then(async () => {
+    const [columns] = await db.execute(sql`SHOW COLUMNS FROM price_list LIKE 'availability'`);
+    if (!Array.isArray(columns) || columns.length === 0) {
+      try {
+        await db.execute(sql`ALTER TABLE price_list ADD COLUMN availability INT NULL AFTER name`);
+      } catch (error) {
+        // Another server may have added the column concurrently.
+        const [current] = await db.execute(sql`SHOW COLUMNS FROM price_list LIKE 'availability'`);
+        if (!Array.isArray(current) || current.length === 0) throw error;
+      }
+    }
+  }).catch(error => { initialization = undefined; throw error; });
   await initialization;
   return db;
 }
@@ -33,6 +45,7 @@ async function saveRows(rows: PriceListInput[]) {
       if (row.id && !existing) throw new TRPCError({ code: "NOT_FOUND", message: `Registro ${row.id} no encontrado` });
       const values = {
         name: row.name,
+        availability: row.availability === undefined ? existing?.availability ?? null : row.availability,
         priceUSD: row.priceUSD.toFixed(2),
         priceMercadoLibre: row.priceMercadoLibre?.toFixed(2) ?? null,
         priceCashea: row.priceCashea?.toFixed(2) ?? null,

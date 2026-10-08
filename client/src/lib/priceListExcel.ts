@@ -13,9 +13,15 @@ export function parsePriceListRows(rows: ExcelRow[]): PriceListInput[] {
     if ([usd, ml, cashea].some(value => value && toMoneyNumber(value) === null)) {
       throw new Error(`Fila ${index + 2}: el precio debe ser un numero valido`);
     }
+    const availabilityText = pickCell(row, ["Disponibilidad"]);
+    const hasAvailability = Object.keys(row).some(key => key.trim().toLowerCase() === "disponibilidad");
+    if (hasAvailability && availabilityText && toMoneyNumber(availabilityText) === null) {
+      throw new Error(`Fila ${index + 2}: Disponibilidad debe ser una cantidad numerica`);
+    }
     const result = priceListRowSchema.safeParse({
       id: idText ? Number(idText) : undefined,
       name,
+      availability: hasAvailability ? (availabilityText ? toMoneyNumber(availabilityText) : null) : undefined,
       priceUSD: toMoneyNumber(usd),
       priceMercadoLibre: ml ? toMoneyNumber(ml) : null,
       priceCashea: cashea ? toMoneyNumber(cashea) : null,

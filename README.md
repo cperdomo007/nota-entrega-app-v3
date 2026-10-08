@@ -17,13 +17,13 @@ Aplicación web para crear, consultar e imprimir notas de entrega con productos,
 
 ## Lista de Precios
 
-Disponible en `/price-list` desde Inicio. Guarda nombre, Precio USD y precios opcionales de Mercado Libre y CASHEA en una tabla independiente; no modifica el maestro ni las notas.
+Disponible en `/price-list` desde Inicio. Guarda nombre, Disponibilidad (cantidad entera opcional, mayor o igual a cero), Precio USD y precios opcionales de Mercado Libre y CASHEA en una tabla independiente; no modifica el maestro ni las notas.
 
-Descarga `plantilla_lista_precios.xlsx` para cargar registros nuevos. Para modificar registros, exporta el Excel y conserva la columna ID; sin ID se busca coincidencia por nombre. Las celdas vacias de Mercado Libre y CASHEA borran esos precios opcionales. Se valida el archivo completo antes de guardar y la importacion usa una transaccion. Admite hasta 5000 filas por archivo.
+Descarga `plantilla_lista_precios.xlsx` para cargar registros nuevos. Para modificar registros, exporta el Excel y conserva la columna ID; sin ID se busca coincidencia por nombre. Disponibilidad aparece después de Nombre de Producto en pantalla, formulario, plantilla, Excel y PDF. Una celda vacía borra la disponibilidad; si el Excel no trae esa columna se conserva la existente. Las celdas vacias de Mercado Libre y CASHEA borran esos precios opcionales. Se valida el archivo completo antes de guardar y la importacion usa una transaccion. Admite hasta 5000 filas por archivo.
 
 Las exportaciones Excel y PDF incluyen los resultados de la busqueda actual. El PDF se descarga directamente y pagina la tabla automaticamente. `Agregar del Maestro` copia solamente los productos que faltan, tomando su precio como Precio USD.
 
-La tabla `price_list` se crea automaticamente al abrir el modulo; la conexion MySQL necesita permiso `CREATE TABLE`.
+La tabla `price_list` se crea automaticamente al abrir el modulo; la conexion MySQL necesita permisos `CREATE TABLE` y `ALTER TABLE` para agregar Disponibilidad a instalaciones existentes.
 
 ## Tecnologías
 

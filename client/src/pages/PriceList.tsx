@@ -10,7 +10,7 @@ import { parsePriceListRows } from "@/lib/priceListExcel";
 import { priceListRowSchema } from "@shared/priceList";
 import "./PriceList.css";
 
-const emptyForm = { name: "", priceUSD: "", priceMercadoLibre: "", priceCashea: "" };
+const emptyForm = { name: "", availability: "", priceUSD: "", priceMercadoLibre: "", priceCashea: "" };
 const money = (value: string | null) => value === null ? "-" : `$${Number(value).toFixed(2)}`;
 const pdfText = (value: string) => value.replace(/[\u2010-\u2015]/g, "-").replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"');
 
@@ -37,7 +37,7 @@ export default function PriceList() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     const result = priceListRowSchema.safeParse({
-      id: editingId, name: form.name,
+      id: editingId, name: form.name, availability: form.availability.trim() ? Number(form.availability) : null,
       priceUSD: form.priceUSD.trim() ? Number(form.priceUSD) : null,
       priceMercadoLibre: form.priceMercadoLibre.trim() ? Number(form.priceMercadoLibre) : null,
       priceCashea: form.priceCashea.trim() ? Number(form.priceCashea) : null,
@@ -88,11 +88,11 @@ export default function PriceList() {
       doc.text(`Fecha: ${new Date().toLocaleDateString("es-VE")}`, 14, dateY);
       autoTable(doc, {
         startY: dateY + 6,
-        head: [["Nombre de Producto", "Precio USD", "Precio Mercado Libre", "Precio CASHEA"]],
-        body: visible.map(row => [pdfText(row.name), money(row.priceUSD), money(row.priceMercadoLibre), money(row.priceCashea)]),
+        head: [["Nombre de Producto", "Disponibilidad", "Precio USD", "Precio Mercado Libre", "Precio CASHEA"]],
+        body: visible.map(row => [pdfText(row.name), row.availability === null ? "-" : String(row.availability), money(row.priceUSD), money(row.priceMercadoLibre), money(row.priceCashea)]),
         theme: "grid", styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak" },
         headStyles: { fillColor: [55, 65, 81] },
-        columnStyles: { 0: { cellWidth: 78 }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } },
+        columnStyles: { 0: { cellWidth: 66 }, 1: { cellWidth: 30, halign: "left" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
         margin: { top: 14, bottom: 18 },
       });
       for (let page = 1; page <= doc.getNumberOfPages(); page++) {
@@ -106,8 +106,8 @@ export default function PriceList() {
 
   function exportExcel(template = false) {
     exportExcelRows(template ? "plantilla_lista_precios.xlsx" : "lista_precios.xlsx", "Lista de Precios",
-      template ? [{ ID: "", "Nombre de Producto": "", "Precio USD": "", "Precio Mercado Libre": "", "Precio CASHEA": "" }]
-      : visible.map(row => ({ ID: row.id, "Nombre de Producto": row.name, "Precio USD": Number(row.priceUSD),
+      template ? [{ ID: "", "Nombre de Producto": "", "Disponibilidad": "", "Precio USD": "", "Precio Mercado Libre": "", "Precio CASHEA": "" }]
+      : visible.map(row => ({ ID: row.id, "Nombre de Producto": row.name, "Disponibilidad": row.availability ?? "", "Precio USD": Number(row.priceUSD),
         "Precio Mercado Libre": row.priceMercadoLibre === null ? "" : Number(row.priceMercadoLibre),
         "Precio CASHEA": row.priceCashea === null ? "" : Number(row.priceCashea) })));
   }
@@ -133,6 +133,7 @@ export default function PriceList() {
         <h2 className="mb-4 text-lg font-semibold">{editingId ? "Editar Precios" : "Nuevo Producto"}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="text-sm font-medium">Nombre de Producto *<Input className="mt-2" required maxLength={255} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
+          <label className="text-sm font-medium">Disponibilidad<Input className="mt-2" type="number" min="0" max="2147483647" step="1" placeholder="Ej.: 10" value={form.availability} onChange={e => setForm({ ...form, availability: e.target.value })} /></label>
           {(["priceUSD", "priceMercadoLibre", "priceCashea"] as const).map((key, index) => <label key={key} className="text-sm font-medium">
             {["Precio USD *", "Precio Mercado Libre", "Precio CASHEA"][index]}
             <Input className="mt-2" type="number" min="0" max="99999999.99" step="0.01" required={index === 0} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} />
@@ -145,15 +146,16 @@ export default function PriceList() {
         : isLoading ? <p className="py-8">Cargando precios...</p>
         : <div className="overflow-x-auto border bg-white">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-gray-100"><tr>{["Nombre de Producto", "Precio USD", "Precio Mercado Libre", "Precio CASHEA", "Acciones"].map((heading, index) => <th key={heading} className={`p-3 ${index === 0 ? "text-left" : "text-right"}`}>{heading}</th>)}</tr></thead>
+            <thead className="bg-gray-100"><tr>{["Nombre de Producto", "Disponibilidad", "Precio USD", "Precio Mercado Libre", "Precio CASHEA", "Acciones"].map((heading, index) => <th key={heading} className={`p-3 ${index < 2 ? "text-left" : "text-right"}`}>{heading}</th>)}</tr></thead>
             <tbody>{visible.map(row => <tr key={row.id} className="border-t">
               <td className="max-w-sm break-words p-3">{row.name}</td>
+              <td className="p-3 break-words">{row.availability ?? "-"}</td>
               <td className="p-3 text-right tabular-nums">{money(row.priceUSD)}</td>
               <td className="p-3 text-right tabular-nums">{money(row.priceMercadoLibre)}</td>
               <td className="p-3 text-right tabular-nums">{money(row.priceCashea)}</td>
               <td className="p-3"><div className="flex justify-end gap-2">
                 <Button variant="outline" size="icon" title="Editar" aria-label={`Editar ${row.name}`} disabled={busy} onClick={() => {
-                  setEditingId(row.id); setForm({ name: row.name, priceUSD: row.priceUSD, priceMercadoLibre: row.priceMercadoLibre ?? "", priceCashea: row.priceCashea ?? "" });
+                  setEditingId(row.id); setForm({ name: row.name, availability: row.availability === null ? "" : String(row.availability), priceUSD: row.priceUSD, priceMercadoLibre: row.priceMercadoLibre ?? "", priceCashea: row.priceCashea ?? "" });
                   setShowForm(true); window.scrollTo({ top: 0, behavior: "smooth" });
                 }}><Edit2 size={16} /></Button>
                 <Button variant="outline" size="icon" title="Eliminar" aria-label={`Eliminar ${row.name}`} disabled={busy} onClick={async () => {
@@ -161,7 +163,7 @@ export default function PriceList() {
                   try { await remove.mutateAsync(row.id); await refetch(); if (editingId === row.id) close(); toast.success("Registro eliminado"); } catch (err) { reportError(err); }
                 }}><Trash2 size={16} className="text-red-600" /></Button>
               </div></td>
-            </tr>)}{!visible.length && <tr><td colSpan={5} className="p-8 text-center text-gray-500">{search ? "Sin coincidencias" : "No hay precios registrados"}</td></tr>}</tbody>
+            </tr>)}{!visible.length && <tr><td colSpan={6} className="p-8 text-center text-gray-500">{search ? "Sin coincidencias" : "No hay precios registrados"}</td></tr>}</tbody>
           </table>
         </div>}
       <p className="mt-3 text-sm text-gray-500">{visible.length} productos</p>
