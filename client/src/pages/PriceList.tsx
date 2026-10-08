@@ -31,6 +31,7 @@ export default function PriceList() {
   const [pdfBusy, setPdfBusy] = useState(false);
   const busy = save.isPending || batch.isPending || remove.isPending || importing;
   const visible = rows.filter(row => row.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const available = visible.filter(row => (row.availability ?? 0) > 0);
   const reportError = (err: unknown) => toast.error(err instanceof Error ? err.message : "No se pudo completar la operacion");
   const close = () => { setShowForm(false); setEditingId(undefined); setForm(emptyForm); };
 
@@ -74,13 +75,15 @@ export default function PriceList() {
     } catch (err) { reportError(err); }
   }
 
-  async function exportPdf() {
+  async function exportPdf(onlyAvailable = false) {
+    const reportRows = onlyAvailable ? available : visible;
+    if (!reportRows.length) { toast.info("No hay productos para exportar"); return; }
     setPdfBusy(true);
     try {
       const [{ jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
       const doc = new jsPDF();
       doc.setFontSize(16);
-      doc.text("Lista de Precios", 14, 18);
+      doc.text(onlyAvailable ? "Lista de Precios - Disponibles" : "Lista de Precios", 14, 18);
       doc.setFontSize(10);
       const companyLines = doc.splitTextToSize(pdfText(company?.businessName || ""), 180);
       if (company?.businessName) doc.text(companyLines, 14, 26);
@@ -89,7 +92,7 @@ export default function PriceList() {
       autoTable(doc, {
         startY: dateY + 6,
         head: [["Nombre de Producto", "Disponibilidad", "Precio USD", "Precio Mercado Libre", "Precio CASHEA"]],
-        body: visible.map(row => [pdfText(row.name), row.availability === null ? "-" : String(row.availability), money(row.priceUSD), money(row.priceMercadoLibre), money(row.priceCashea)]),
+        body: reportRows.map(row => [pdfText(row.name), row.availability === null ? "-" : String(row.availability), money(row.priceUSD), money(row.priceMercadoLibre), money(row.priceCashea)]),
         theme: "grid", styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak" },
         headStyles: { fillColor: [55, 65, 81] },
         columnStyles: { 0: { cellWidth: 66 }, 1: { cellWidth: 30, halign: "left" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
@@ -99,7 +102,7 @@ export default function PriceList() {
         doc.setPage(page); doc.setFontSize(9);
         doc.text(`Pagina ${page} de ${doc.getNumberOfPages()}`, 196, 288, { align: "right" });
       }
-      doc.save("lista_precios.pdf");
+      doc.save(onlyAvailable ? "lista_precios_disponibles.pdf" : "lista_precios.pdf");
     } catch (err) { reportError(err); }
     finally { setPdfBusy(false); }
   }
@@ -126,7 +129,8 @@ export default function PriceList() {
         <Button variant="outline" disabled={busy || isLoading || !!error} onClick={() => fileRef.current?.click()}><Upload size={16} />{importing ? "Importando..." : "Importar Excel"}</Button>
         <Button variant="outline" onClick={() => exportExcel(true)}><Download size={16} /> Plantilla Excel</Button>
         <Button variant="outline" disabled={!visible.length || busy} onClick={() => exportExcel()}><Download size={16} /> Exportar Excel</Button>
-        <Button variant="outline" disabled={!visible.length || pdfBusy} onClick={exportPdf}><FileDown size={16} />{pdfBusy ? "Generando..." : "Exportar PDF"}</Button>
+        <Button variant="outline" disabled={!visible.length || pdfBusy} onClick={() => exportPdf()}><FileDown size={16} />{pdfBusy ? "Generando..." : "Exportar PDF"}</Button>
+        <Button variant="outline" disabled={!available.length || pdfBusy || busy} onClick={() => exportPdf(true)}><FileDown size={16} /> Exportar Disponible PDF</Button>
         <Button variant="outline" disabled={busy || isLoading || !!error || !products.length} onClick={copyProducts}><Package size={16} /> Agregar del Maestro</Button>
       </div>
       {showForm && <form onSubmit={submit} className="mb-6 border-y bg-white py-5">

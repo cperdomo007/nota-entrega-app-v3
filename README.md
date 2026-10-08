@@ -21,7 +21,7 @@ Disponible en `/price-list` desde Inicio. Guarda nombre, Disponibilidad (cantida
 
 Descarga `plantilla_lista_precios.xlsx` para cargar registros nuevos. Para modificar registros, exporta el Excel y conserva la columna ID; sin ID se busca coincidencia por nombre. Disponibilidad aparece después de Nombre de Producto en pantalla, formulario, plantilla, Excel y PDF. Una celda vacía borra la disponibilidad; si el Excel no trae esa columna se conserva la existente. Las celdas vacias de Mercado Libre y CASHEA borran esos precios opcionales. Se valida el archivo completo antes de guardar y la importacion usa una transaccion. Admite hasta 5000 filas por archivo.
 
-Las exportaciones Excel y PDF incluyen los resultados de la busqueda actual. El PDF se descarga directamente y pagina la tabla automaticamente. `Agregar del Maestro` copia solamente los productos que faltan, tomando su precio como Precio USD.
+Las exportaciones Excel y PDF incluyen los resultados de la busqueda actual. `Exportar Disponible PDF` incluye solamente productos de la búsqueda actual con Disponibilidad mayor que 0; excluye cantidades vacías y cero. El PDF se descarga directamente y pagina la tabla automaticamente. `Agregar del Maestro` copia solamente los productos que faltan, tomando su precio como Precio USD.
 
 La tabla `price_list` se crea automaticamente al abrir el modulo; la conexion MySQL necesita permisos `CREATE TABLE` y `ALTER TABLE` para agregar Disponibilidad a instalaciones existentes.
 
