@@ -20,6 +20,7 @@ export default function CreateBudget() {
   const [editMatch, editParams] = useRoute("/budgets/:id/edit");
   const [, setLocation] = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const loadedBudgetId = useRef<number | null>(null);
   const budgetId = Number(editParams?.id);
   const isEditing = Boolean(editMatch && budgetId);
 
@@ -38,8 +39,10 @@ export default function CreateBudget() {
   const [showClientSearch, setShowClientSearch] = useState(false);
 
   const { data: nextNumber } = trpc.budgets.getNextNumber.useQuery();
-  const { data: budgetToEdit, isLoading: isLoadingBudgetToEdit } = trpc.budgets.getById.useQuery(budgetId, {
+  const { data: budgetToEdit, isFetching: isFetchingBudgetToEdit } = trpc.budgets.getById.useQuery(budgetId, {
     enabled: isEditing,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const { data: config } = trpc.config.get.useQuery();
   const { data: products = [] } = trpc.products.list.useQuery();
@@ -56,7 +59,8 @@ export default function CreateBudget() {
   }, [budgetNumber, isEditing, nextNumber]);
 
   useEffect(() => {
-    if (!budgetToEdit) return;
+    if (!isEditing || !budgetToEdit || isFetchingBudgetToEdit || loadedBudgetId.current === budgetId) return;
+    loadedBudgetId.current = budgetId;
 
     setBudgetNumber(String(budgetToEdit.budgetNumber ?? ""));
     setBudgetDate(format(new Date(budgetToEdit.budgetDate as any), "yyyy-MM-dd"));
@@ -76,7 +80,7 @@ export default function CreateBudget() {
         lineTotal: Number(line.lineTotal) || 0,
       }))
     );
-  }, [budgetToEdit]);
+  }, [budgetId, budgetToEdit, isEditing, isFetchingBudgetToEdit]);
 
   const productSearchResults = useMemo(() => {
     const query = productSearchQuery.trim().toLowerCase();
@@ -185,7 +189,7 @@ export default function CreateBudget() {
     }
   };
 
-  if (isEditing && isLoadingBudgetToEdit) {
+  if (isEditing && isFetchingBudgetToEdit && loadedBudgetId.current !== budgetId) {
     return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>Cargando presupuesto...</div>;
   }
 
@@ -311,7 +315,7 @@ export default function CreateBudget() {
                   {lines.map((line, index) => (
                     <tr key={index} style={{ borderBottom: "1px solid #e2e8f0" }}>
                       <td style={{ padding: "0.75rem" }}><Input value={line.description} onChange={(event) => updateLine(index, { description: event.target.value })} /></td>
-                      <td style={{ padding: "0.75rem", textAlign: "center" }}><Input type="number" min="1" value={line.quantity} onChange={(event) => updateLine(index, { quantity: Number(event.target.value) || 1 })} style={{ width: "80px", textAlign: "center" }} /></td>
+                      <td style={{ padding: "0.75rem", textAlign: "center" }}><Input type="number" min="1" value={line.quantity} onWheel={(event) => event.currentTarget.blur()} onChange={(event) => updateLine(index, { quantity: Number(event.target.value) || 1 })} style={{ width: "80px", textAlign: "center" }} /></td>
                       <td style={{ padding: "0.75rem", textAlign: "right" }}><Input type="number" min="0" step="0.01" value={line.unitPrice} onChange={(event) => updateLine(index, { unitPrice: Number(event.target.value) || 0 })} style={{ width: "120px", textAlign: "right" }} /></td>
                       <td style={{ padding: "0.75rem", textAlign: "right", fontWeight: "600" }}>${line.lineTotal.toFixed(2)}</td>
                       <td style={{ padding: "0.75rem", textAlign: "center" }}><Button onClick={() => removeLine(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer" }}><Trash2 style={{ width: "1rem", height: "1rem" }} /></Button></td>

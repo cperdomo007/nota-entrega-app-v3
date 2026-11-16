@@ -44,6 +44,7 @@ export default function CreateNote() {
   const [, setLocation] = useLocation();
   const [editMatch, editParams] = useRoute("/notes/:id/edit");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const loadedNoteId = useRef<number | null>(null);
   const noteId = editMatch ? Number(editParams?.id) : null;
   const isEditing = Number.isFinite(noteId);
 
@@ -67,9 +68,9 @@ export default function CreateNote() {
   const [showClientSearch, setShowClientSearch] = useState(false);
 
   const { data: nextNumber } = trpc.notes.getNextNumber.useQuery();
-  const { data: noteToEdit, isLoading: isLoadingNoteToEdit } = trpc.notes.getById.useQuery(
+  const { data: noteToEdit, isFetching: isFetchingNoteToEdit } = trpc.notes.getById.useQuery(
     noteId ?? 0,
-    { enabled: isEditing }
+    { enabled: isEditing, refetchOnWindowFocus: false, refetchOnReconnect: false }
   );
   const { data: config } = trpc.config.get.useQuery();
   const { data: products = [] } = trpc.products.list.useQuery();
@@ -88,7 +89,8 @@ export default function CreateNote() {
   }, [isEditing, nextNumber, noteNumber]);
 
   useEffect(() => {
-    if (!isEditing || !noteToEdit) return;
+    if (!isEditing || !noteToEdit || isFetchingNoteToEdit || loadedNoteId.current === noteId) return;
+    loadedNoteId.current = noteId;
 
     setNoteNumber(String(noteToEdit.noteNumber ?? ""));
     setNoteDate(toDateInputValue(noteToEdit.noteDate));
@@ -113,7 +115,7 @@ export default function CreateNote() {
         };
       })
     );
-  }, [isEditing, noteToEdit]);
+  }, [isEditing, isFetchingNoteToEdit, noteId, noteToEdit]);
 
   const productSearchResults = useMemo(() => {
     const query = productSearchQuery.trim().toLowerCase();
@@ -332,7 +334,7 @@ export default function CreateNote() {
     setClientSearchQuery("");
   };
 
-  if (isEditing && isLoadingNoteToEdit) {
+  if (isEditing && isFetchingNoteToEdit && loadedNoteId.current !== noteId) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(to bottom right, #f8fafc, #f1f5f9)" }}>
         <div style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b" }}>Cargando nota...</div>
@@ -518,7 +520,7 @@ export default function CreateNote() {
                         <div style={{ fontSize: "0.875rem", color: "#64748b" }}>{line.product?.barcode}</div>
                       </td>
                       <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                        <Input type="number" min="1" value={line.quantity} onChange={(event) => updateLine(index, { quantity: Number(event.target.value) || 1 })} style={{ width: "70px", textAlign: "center" }} />
+                        <Input type="number" min="1" value={line.quantity} onWheel={(event) => event.currentTarget.blur()} onChange={(event) => updateLine(index, { quantity: Number(event.target.value) || 1 })} style={{ width: "70px", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "0.75rem", textAlign: "right" }}>
                         <Input type="number" min="0" value={line.unitPrice} onChange={(event) => updateLine(index, { unitPrice: Number(event.target.value) || 0 })} step="0.01" style={{ width: "100px", textAlign: "right" }} />
