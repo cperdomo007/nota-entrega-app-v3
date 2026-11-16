@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { format } from "date-fns";
 import { Plus, Trash2, X } from "lucide-react";
+import { QuantityInput } from "@/components/QuantityInput";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -520,7 +521,7 @@ export default function CreateNote() {
                         <div style={{ fontSize: "0.875rem", color: "#64748b" }}>{line.product?.barcode}</div>
                       </td>
                       <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                        <Input type="number" min="1" value={line.quantity} onWheel={(event) => event.currentTarget.blur()} onChange={(event) => updateLine(index, { quantity: Number(event.target.value) || 1 })} style={{ width: "70px", textAlign: "center" }} />
+                        <QuantityInput quantity={line.quantity} onQuantityChange={(quantity) => updateLine(index, { quantity })} style={{ width: "70px", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "0.75rem", textAlign: "right" }}>
                         <Input type="number" min="0" value={line.unitPrice} onChange={(event) => updateLine(index, { unitPrice: Number(event.target.value) || 0 })} step="0.01" style={{ width: "100px", textAlign: "right" }} />
