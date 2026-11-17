@@ -92,7 +92,7 @@ export type InsertCompanyConfig = typeof companyConfig.$inferInsert;
 export const deliveryNotes = mysqlTable("delivery_notes", {
   id: int("id").autoincrement().primaryKey(),
   noteNumber: varchar("noteNumber", { length: 50 }).notNull().unique(),
-  noteDate: date("noteDate").notNull(),
+  noteDate: date("noteDate", { mode: "string" }).notNull(),
   clientName: text("clientName").notNull(),
   clientRif: varchar("clientRif", { length: 50 }),
   clientAddress: text("clientAddress"),
@@ -116,7 +116,7 @@ export type InsertDeliveryNote = typeof deliveryNotes.$inferInsert;
 export const budgets = mysqlTable("budgets", {
   id: int("id").autoincrement().primaryKey(),
   budgetNumber: varchar("budgetNumber", { length: 50 }).notNull().unique(),
-  budgetDate: date("budgetDate").notNull(),
+  budgetDate: date("budgetDate", { mode: "string" }).notNull(),
   clientName: text("clientName").notNull(),
   clientRif: varchar("clientRif", { length: 50 }),
   clientAddress: text("clientAddress"),

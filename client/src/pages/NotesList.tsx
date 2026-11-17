@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { Plus, Eye, Printer, Download, Search, Home } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function NotesList() {
@@ -122,7 +122,7 @@ export default function NotesList() {
                     <tr key={note.id} style={{ borderBottom: "1px solid #e2e8f0", transition: "background 0.2s" }}>
                       <td style={{ padding: "1rem", color: "#1e293b", fontWeight: "600" }}>#{note.noteNumber}</td>
                       <td style={{ padding: "1rem", color: "#1e293b" }}>
-                        {format(new Date(note.noteDate), "dd/MM/yyyy")}
+                        {format(parseISO(note.noteDate), "dd/MM/yyyy")}
                       </td>
                       <td style={{ padding: "1rem", color: "#1e293b" }}>{note.clientName}</td>
                       <td style={{ padding: "1rem", textAlign: "right", color: "#1e293b", fontWeight: "600" }}>

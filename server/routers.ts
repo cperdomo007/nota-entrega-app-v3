@@ -223,7 +223,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const result = await createDeliveryNote({
           noteNumber: input.noteNumber,
-          noteDate: new Date(`${input.noteDate.slice(0, 10)}T00:00:00`),
+          noteDate: input.noteDate,
           clientName: input.clientName,
           clientRif: input.clientRif || null,
           clientAddress: input.clientAddress || null,

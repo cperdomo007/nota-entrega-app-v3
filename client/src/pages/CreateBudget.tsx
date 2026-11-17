@@ -64,7 +64,7 @@ export default function CreateBudget() {
     loadedBudgetId.current = budgetId;
 
     setBudgetNumber(String(budgetToEdit.budgetNumber ?? ""));
-    setBudgetDate(format(new Date(budgetToEdit.budgetDate as any), "yyyy-MM-dd"));
+    setBudgetDate(budgetToEdit.budgetDate);
     setClientName(String(budgetToEdit.clientName ?? ""));
     setClientRif(String(budgetToEdit.clientRif ?? ""));
     setClientAddress(String(budgetToEdit.clientAddress ?? ""));

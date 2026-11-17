@@ -2,7 +2,7 @@ import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Download, Edit, Printer, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export default function BudgetDetail() {
   const [match, params] = useRoute("/budgets/:id");
@@ -42,7 +42,7 @@ export default function BudgetDetail() {
         <div className="responsive-header budget-detail-screen-header" style={{ marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#1e293b" }}>Presupuesto #{budget.budgetNumber}</h1>
-            <p style={{ color: "#64748b", marginTop: "0.5rem" }}>{format(new Date(budget.budgetDate as any), "dd/MM/yyyy")}</p>
+            <p style={{ color: "#64748b", marginTop: "0.5rem" }}>{format(parseISO(budget.budgetDate), "dd/MM/yyyy")}</p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <Button onClick={() => window.print()} style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgb(59, 130, 246)", color: "white", border: "none", padding: "0.75rem 1.5rem", borderRadius: "0.375rem", cursor: "pointer", fontWeight: "600" }}>
@@ -116,7 +116,7 @@ export default function BudgetDetail() {
                 </div>
                 <div style={{ border: "1px solid #333", padding: "0.5rem", textAlign: "center" }}>
                   <div style={{ fontSize: "9px", color: "#666" }}>Fecha</div>
-                  <div style={{ fontWeight: "bold" }}>{format(new Date(budget.budgetDate as any), "dd-MM-yyyy")}</div>
+                  <div style={{ fontWeight: "bold" }}>{format(parseISO(budget.budgetDate), "dd-MM-yyyy")}</div>
                 </div>
               </div>
               <div><strong>Atención:</strong> {budget.clientContact || ""}</div>

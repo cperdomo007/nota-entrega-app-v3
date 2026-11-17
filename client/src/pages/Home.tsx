@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { Plus, FileText, Settings, Package, Users, Calculator, ListOrdered } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function Home() {
@@ -191,7 +191,7 @@ export default function Home() {
                         Nota #{note.noteNumber}
                       </h3>
                       <p style={{ fontSize: "0.875rem", color: "#64748b" }}>
-                        {note.clientName} • {format(new Date(note.noteDate as any), "d 'de' MMMM 'de' yyyy", { locale: es })}
+                        {note.clientName} • {format(parseISO(note.noteDate), "d 'de' MMMM 'de' yyyy", { locale: es })}
                       </p>
                     </div>
                     <div style={{ textAlign: "right" }}>

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { Edit, Eye, FileText, Home, Plus, Search } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export default function BudgetsList() {
   const [, setLocation] = useLocation();
@@ -79,7 +79,7 @@ export default function BudgetsList() {
                 {budgets.map((budget: any) => (
                   <tr key={budget.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
                     <td style={{ padding: "1rem", fontWeight: "600", color: "#1e293b" }}>#{budget.budgetNumber}</td>
-                    <td style={{ padding: "1rem", color: "#1e293b" }}>{format(new Date(budget.budgetDate), "dd/MM/yyyy")}</td>
+                    <td style={{ padding: "1rem", color: "#1e293b" }}>{format(parseISO(budget.budgetDate), "dd/MM/yyyy")}</td>
                     <td style={{ padding: "1rem", color: "#1e293b" }}>{budget.clientName}</td>
                     <td style={{ padding: "1rem", textAlign: "right", fontWeight: "600", color: "#1e293b" }}>${Number(budget.total || 0).toFixed(2)}</td>
                     <td style={{ padding: "1rem", textAlign: "center" }}>

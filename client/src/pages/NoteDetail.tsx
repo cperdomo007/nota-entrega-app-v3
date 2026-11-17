@@ -2,7 +2,7 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { Printer, Download, ArrowLeft } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { useRef } from "react";
 
@@ -79,7 +79,7 @@ export default function NoteDetail() {
               Nota de Entrega #{note.noteNumber}
             </h1>
             <p style={{ color: "#64748b", marginTop: "0.5rem" }}>
-              {format(new Date(note.noteDate as any), "d 'de' MMMM 'de' yyyy", { locale: es })}
+              {format(parseISO(note.noteDate), "d 'de' MMMM 'de' yyyy", { locale: es })}
             </p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem" }}>
@@ -192,7 +192,7 @@ export default function NoteDetail() {
                   <div style={{ border: "1px solid #333", padding: "0.5rem", textAlign: "center" }}>
                     <div style={{ fontSize: "9px", color: "#666" }}>Fecha</div>
                     <div style={{ fontSize: "12px", fontWeight: "bold" }}>
-                      {format(new Date(note.noteDate as any), "dd-MM-yyyy")}
+                      {format(parseISO(note.noteDate), "dd-MM-yyyy")}
                     </div>
                   </div>
                 </div>

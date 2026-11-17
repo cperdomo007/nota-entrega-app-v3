@@ -23,7 +23,7 @@ export type CompleteDeliveryNoteLineInput = {
 
 export type CompleteDeliveryNoteInput = {
   noteNumber: string;
-  noteDate: string | Date;
+  noteDate: string;
   clientName: string;
   clientRif?: string | null;
   clientAddress?: string | null;
@@ -50,7 +50,7 @@ export type CompleteBudgetLineInput = {
 
 export type CompleteBudgetInput = {
   budgetNumber: string;
-  budgetDate: string | Date;
+  budgetDate: string;
   clientName: string;
   clientRif?: string | null;
   clientAddress?: string | null;
@@ -70,14 +70,15 @@ function toMoney(value: number): string {
   return value.toFixed(2);
 }
 
-function toDateOnly(value: string | Date): Date {
-  const date = value instanceof Date ? value : new Date(`${value.slice(0, 10)}T00:00:00`);
+function toDateOnly(value: string): string {
+  const day = value.slice(0, 10);
+  const date = new Date(`${day}T00:00:00Z`);
 
-  if (Number.isNaN(date.getTime())) {
-    throw new Error("La fecha de la nota no es válida");
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== day) {
+    throw new Error("La fecha del documento no es válida");
   }
 
-  return date;
+  return day;
 }
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
@@ -291,7 +292,7 @@ export async function getNextNoteNumber() {
 export async function createDeliveryNote(data: Omit<DeliveryNote, 'id' | 'createdAt' | 'updatedAt'>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(deliveryNotes).values(data);
+  const result = await db.insert(deliveryNotes).values({ ...data, noteDate: toDateOnly(data.noteDate) });
   return result;
 }
 

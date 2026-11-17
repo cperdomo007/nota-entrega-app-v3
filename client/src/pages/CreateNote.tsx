@@ -22,25 +22,6 @@ function normalizeSerial(serial: string) {
   return serial.trim();
 }
 
-function toDateInputValue(value: unknown) {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return format(value, "yyyy-MM-dd");
-  }
-
-  if (typeof value === "string") {
-    if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
-      return value.slice(0, 10);
-    }
-
-    const parsed = new Date(value);
-    if (!Number.isNaN(parsed.getTime())) {
-      return format(parsed, "yyyy-MM-dd");
-    }
-  }
-
-  return format(new Date(), "yyyy-MM-dd");
-}
-
 export default function CreateNote() {
   const [, setLocation] = useLocation();
   const [editMatch, editParams] = useRoute("/notes/:id/edit");
@@ -94,7 +75,7 @@ export default function CreateNote() {
     loadedNoteId.current = noteId;
 
     setNoteNumber(String(noteToEdit.noteNumber ?? ""));
-    setNoteDate(toDateInputValue(noteToEdit.noteDate));
+    setNoteDate(noteToEdit.noteDate);
     setClientName(String(noteToEdit.clientName ?? ""));
     setClientRif(String(noteToEdit.clientRif ?? ""));
     setClientAddress(String(noteToEdit.clientAddress ?? ""));
